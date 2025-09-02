@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Freefall Frenzy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            align-items: center;
+        }
+        body {
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            width: 80%;
+            max-width: 400px;
+        }
+        #scoreDisplay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: black;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #startScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 200px;
+        }
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            display: none;
+        }
+        .mobileBtn {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        @media (max-width: 768px) {
+            #mobileControls {
+                display: flex;
+            }
+        }
+        /* Add to your existing <style> section */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.panel {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    padding: 15px;
+    align-items: center;
+}
+
+.setting-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 15px 0;
+    width: 100%;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+#topText {
+    margin: 20px;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+    width: 100%;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+.music-control {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.music-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+#musicVolume {
+    width: 100%;
+    margin: 10px 0;
+    -webkit-appearance: none;  /* Remove default styling */
+    height: 8px;
+    background: #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+/* Custom slider thumb */
+#musicVolume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#musicVolume::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    border-radius: 50%;
+    cursor: pointer;
+}
+/* Add to your existing CSS */
+.gameover-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.music-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+}
+#powerupTimers {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#shieldTimer {
+    color: #FF9800; /* Orange */
+}
+
+#speedTimer {
+    color: #00BCD4; /* Cyan */
+}
+
+.time {
+    font-family: monospace;
+}
+#howToPlayPanel ul {
+    margin: 0px 0;
+    padding-left: 0px;
+}
+
+#howToPlayPanel li {
+    margin: 0px 0;
+    list-style-type: disc;
+}
+
+#howToPlayPanel strong {
+    color: #4CAF50;
+}
+/* Platform examples in How to Play */
+.platform-example {
+    display: inline-block;
+    width: 60px;
+    height: 15px;
+    border-radius: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.how-to-play-item {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    gap: 10px;
+}
+/* Add to your existing CSS */
+#themeSelect {
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+.theme-cloud {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    filter: blur(5px);
+}
+
+.theme-rain {
+    position: absolute;
+    background-color: rgba(200, 200, 255, 0.6);
+    width: 1px;
+}
+
+.theme-star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.theme-sand {
+    position: absolute;
+    background-color: #f5deb3;
+    border-radius: 50%;
+}
+
+.theme-wave {
+    position: absolute;
+    background-color: rgba(0, 100, 200, 0.3);
+    border-radius: 50%;
+}
+.credits-content {
+    text-align: left;
+    padding: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.credit-category {
+    margin-bottom: 15px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.credit-category h3 {
+    color: #4CAF50;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #4CAF50;
+    padding-bottom: 3px;
+}
+
+.version-info {
+    margin-top: 20px;
+    font-size: 0.8em;
+    color: #aaa;
+}
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="scoreDisplay">Score: 0</div><div id="powerupTimers" style="position: absolute; top: 10px; right: 10px; font-size: 20px; color: black; background-color: rgba(255, 255, 255, 0.7); padding: 5px 10px; border-radius: 5px; display: none;">
+    <div id="shieldTimer" style="display: none;">Shield 🛡️ <span class="time">0s</span></div>
+    <div id="speedTimer" style="display: none;">Speed ⚡ <span class="time">0s</span></div>
+</div>
+        <div id="gameOver">
+    <h1>Game Over</h1>
+    <p id="finalScore">Score: 0</p>
+    <div class="gameover-buttons">
+        <button onclick="resetGame()">Play Again</button>
+        <button onclick="returnToMenu()">Main Menu</button>
+    </div>
+</div>
+        <div id="startScreen">
+    <span id="topText"><h1>Freefall Frenzy</h1>
+    <p>Best if Played With Internet</p></span>
+    <div class="menu-buttons">
+        <button onclick="startGame()">Start Game</button>
+        <button onclick="showHowToPlay()">How to Play</button> <!-- New button -->
+        <button onclick="showSettings()">Settings</button>
+        <button onclick="showCredits()">Credits</button>
+        <small>Version: 1.11.7</small>
+    </div>
+
+<!-- How to Play Panel -->
+    <div id="howToPlayPanel"  class="panel" style="display: none;">
+    <h2>How to Play</h2>
+    <div style="text-align: left; padding: 10px;">
+        <p><strong>Objective:</strong> Jump on platforms to score points without falling!</p>
+        
+        <p><strong>Controls:</strong></p>
+        <ul>
+            <li>← → Arrow Keys or A/D to move left/right</li>
+            <li>Tap buttons on mobile</li>
+        </ul>
+        
+        <p><strong>Platform Types:</strong></p>
+        <div style="gap: 10px; margin: 15px 0;align-contents:left;">
+            <!-- Normal Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #4CAF50; border-radius: 3px;"></div>
+                <span>Normal (Safe)</span>
+            </div>
+            
+            <!-- Breakable Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #FFEB3B; border-radius: 3px; position: relative;">
+                    <div style="position: absolute; width: 100%; height: 100%; display: flex; justify-content: center;">
+                        <div style="width: 80%; height: 2px; background: rgba(0,0,0,0.5); transform: rotate(-5deg); margin-top: 6px;"></div>
+                    </div>
+                </div>
+                <span>Breakable (1s)</span>
+            </div>
+            
+            <!-- Dangerous Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #F44336; border-radius: 3px;"></div>
+                <span>Dangerous (Use Shield)</span>
+            </div>
+            
+            <!-- Bounce Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #9C27B0; border-radius: 3px;"></div>
+                <span>Bounce (Super Jump)</span>
+            </div>
+            
+            <!-- Shield Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #FF9800; border-radius: 3px;"></div>
+                <span>Shield (30s)</span>
+            </div>
+            
+            <!-- Speed Platform -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 60px; height: 15px; background-color: #00BCD4; border-radius: 3px;"></div>
+                <span>Speed (5s)</span>
+            </div>
+        </div>
+        
+        <p><strong>Tip:</strong> Chain jumps on platforms quickly for combo points!</p>
+    </div>
+    <button onclick="hideHowToPlay()">Back</button>
+</div>
+    <!-- Settings Panel (Hidden by Default) -->
+    <div id="settingsPanel" class="panel" style="display: none;">
+        <h2>Settings</h2>
+        <div class="setting-option">
+        <div class="music-control">
+            <div class="music-toggle">
+                <label>Music</label>
+                <label class="switch">
+                    <input type="checkbox" id="musicToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <input type="range" id="musicVolume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+    </div>
+        <div class="setting-option">
+            <label>Sounds</label>
+            <label class="switch">
+                <input type="checkbox" id="soundToggle" checked>
+                <span class="slider"></span>
+            </label>
+            
+        </div>
+        <!-- Add this inside your settingsPanel div -->
+<div class="setting-option">
+    <label>Theme</label>
+    <select id="themeSelect">
+        <option value="day">Normal Day</option>
+        <option value="rain">Rainy Day</option>
+        <option value="desert">Desert</option>
+        <option value="sea">Sea</option>
+        <option value="space">Space</option>
+    </select>
+</div>
+        <button onclick="hideSettings()">Back</button>
+    </div>
+
+    <!-- Credits Panel (Hidden by Default) -->
+    <div id="creditsPanel" class="panel" style="display: none;">
+    <h2>Game Credits</h2>
+    
+    <div class="credits-content">
+        <div class="credit-category">
+            <h3>Development</h3>
+            <p><strong>Gamer Id47</strong> - Lead Developer, Game Design</p>
+            <p><strong>DeepSeek Chat</strong> - Coding Assistant, Technical Advisor</p>
+            <p>Chat sessions: 6</p>
+        </div>
+        
+        <div class="credit-category">
+            <h3>Audio</h3>
+            <p>All sound effects and background music from <strong>Mixkit.com</strong></p>
+        </div>
+        
+     
+        
+        <div class="version-info">
+            <p>Created with JavaScript, HTML5 Canvas</p>
+            <p>© 2025 All Rights Reserved</p><p>Freefall Frenzy 1.11.7</p>
+        </div>
+    </div>
+    
+    <button onclick="hideCredits()">Back</button>
+</div>
+</div>
+        <div id="mobileControls">
+            <div class="mobileBtn" id="leftBtn">←</div>
+            <div class="mobileBtn" id="rightBtn">→</div>
+        </div>
+    </div>
+    <script>
+        // Game state
+        let gameRunning = false;
+        let score = 0;
+        let platforms = [];
+        let spikes = [];
+        let keys = {};
+        let gameSpeed = 2;
+        let platformSpawnRate = 100; // frames between platform spawns
+        let platformSpawnCounter = 0;
+        let isMobile = /Mobi|Android/i.test(navigator.userAgent);
+        let highScore = 0;
+        let comboCount = 0;
+        let lastPlatformY = 0;
+        let particles = [];
+        let isBouncing = false;
+        let bounceStartTime = 0;
+        let shieldTimer = null;
+        let speedTimer = null;
+        let audioContext;
+        let gainNode;
+        const soundBuffers = {};
+        let soundEnabled = true;
+        let trailPositions = [];
+        const MAX_TRAIL_LENGTH = 10;
+        const TRAIL_UPDATE_RATE = 3;
+        let trailUpdateCounter = 0;
+        let currentTheme = 'day';
+let themeElements = [];
+const THEME_BACKGROUNDS = {
+    day: '#87CEEB', // Sky blue
+    rain: '#606060', // Gray
+    desert: '#F4A460', // Sandy brown
+    sea: '#1E90FF', // Dodger blue
+    space: '#000033' // Dark blue
+};
+        // Game variables
+        // Add this with your other game state variables
+const powerupTimers = {
+    shield: { 
+        element: document.getElementById('shieldTimer'),
+        active: false, 
+        time: 0,
+        timer: null
+    },
+    speed: { 
+        element: document.getElementById('speedTimer'),
+        active: false, 
+        time: 0,
+        timer: null
+    },
+    container: document.getElementById('powerupTimers')
+};
+        const BOUNCE_DURATION = 1000;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const gameOverScreen = document.getElementById('gameOver');
+        const finalScore = document.getElementById('finalScore');
+        const startScreen = document.getElementById('startScreen');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+// ===== AUDIO SYSTEM ===== //
+const bgMusic = new Audio('https://assets.mixkit.co/music/872/872.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.5;
+let musicEnabled = true;
+let soundsEnabled = true;
+
+const soundEffects = {
+    jump: new Audio('https://assets.mixkit.co/active_storage/sfx/2043/2043-preview.mp3'),
+    powerup: new Audio('https://assets.mixkit.co/active_storage/sfx/600/600-preview.mp3'),
+    shield: new Audio('https://assets.mixkit.co/active_storage/sfx/2600/2600-preview.mp3'),
+    bounce: new Audio('https://assets.mixkit.co/active_storage/sfx/239/239-preview.mp3'),
+    gameOver: new Audio('https://assets.mixkit.co/active_storage/sfx/2027/2027-preview.mp3'),
+    platformBreak: new Audio('https://assets.mixkit.co/active_storage/sfx/2759/2759-preview.mp3'),
+    transform: new Audio('https://assets.mixkit.co/active_storage/sfx/253/253-preview.mp3')
+};
+// Force preload immediately
+for (let key in soundEffects) {
+    soundEffects[key].preload = "auto";
+    soundEffects[key].load();
+}
+
+// Initialize sound volumes
+Object.values(soundEffects).forEach(sound => {
+    sound.volume = 0.3;
+});
+        
+        function initThemeElements() {
+    clearThemeElements();
+    
+    switch(currentTheme) {
+        case 'day':
+            createClouds(5);
+            break;
+        case 'rain':
+            createRainElements();
+            break;
+        case 'desert':
+            createDesertElements();
+            break;
+        case 'sea':
+            createSeaElements(5);
+            break;
+        case 'space':
+            createStars(100);
+            break;
+    }
+}
+function drawThemeBackground() {
+    const bgColors = {
+        day: '#87CEEB',
+        rain: '#606060',
+        desert: '#F4A460',
+        sea: '#1E90FF',
+        space: '#000033'
+    };
+    ctx.fillStyle = bgColors[currentTheme] || '#87CEEB';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function clearThemeElements() {
+    themeElements = [];
+}
+
+// Theme element creation functions
+function updateDayTheme() {
+    // Sky gradient for day theme
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    skyGradient.addColorStop(0, '#87CEEB'); // Light blue at top
+    skyGradient.addColorStop(1, '#E0F7FF'); // Lighter blue at bottom
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw sun
+    ctx.fillStyle = '#FFEE58';
+    ctx.beginPath();
+    ctx.arc(canvas.width * 0.8, canvas.height * 0.2, 40, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Update and draw clouds
+    for (let element of themeElements) {
+        if (element.type === 'cloud') {
+            element.x += element.speed;
+            if (element.x > canvas.width + element.width) {
+                element.x = -element.width;
+                element.y = Math.random() * canvas.height * 0.5;
+            }
+            
+            drawCloud(element.x, element.y, element.width, element.height, element.darkness);
+        }
+    }
+}
+
+
+function updateDesertTheme() {
+    // Sky gradient with proper bounds checking
+    const skyHeight = Math.max(10, canvas.height * 0.7); // Ensure minimum height
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, skyHeight);
+    skyGradient.addColorStop(0, '#FF7F24');
+    skyGradient.addColorStop(1, '#F4D03F');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, canvas.width, skyHeight);
+
+    // Sun with bounds checking
+    const sunRadius = Math.min(30, canvas.height * 0.1); // Limit maximum size
+    ctx.fillStyle = '#F39C12';
+    ctx.beginPath();
+    ctx.arc(
+        Math.max(sunRadius, Math.min(canvas.width * 0.8, canvas.width - sunRadius)), // x
+        Math.max(sunRadius, canvas.height * 0.15), // y
+        sunRadius, // radius
+        0, Math.PI * 2
+    );
+    ctx.fill();
+    
+    // Mirage effect with safety checks
+    if (canvas.height > 100) { // Only draw if canvas has reasonable size
+        const mirageY = Math.min(canvas.height * 0.65, canvas.height - 50);
+        ctx.save();
+        const mirageGradient = ctx.createLinearGradient(0, mirageY, 0, mirageY + canvas.height * 0.1);
+        mirageGradient.addColorStop(0, 'rgba(255,255,255,0.3)');
+        mirageGradient.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = mirageGradient;
+        ctx.fillRect(0, mirageY, canvas.width, canvas.height * 0.1);
+        ctx.restore();
+    }
+
+    // Update desert elements with error handling
+    for (let i = themeElements.length - 1; i >= 0; i--) {
+        const element = themeElements[i];
+        try {
+            switch(element.type) {
+                case 'dune':
+                    drawDune(element);
+                    break;
+                case 'sand':
+                    updateSandParticle(element);
+                    break;
+                case 'dustDevil':
+                    if (!updateDustDevil(element)) {
+                        themeElements.splice(i, 1); // Remove if returned false
+                    }
+                    break;
+                case 'palm':
+                    drawPalmTree(element);
+                    break;
+            }
+        } catch (e) {
+            console.warn(`Error drawing ${element.type}:`, e);
+            themeElements.splice(i, 1); // Remove problematic element
+        }
+    }
+}
+function drawDune(dune) {
+    ctx.fillStyle = dune.color;
+    ctx.beginPath();
+    ctx.moveTo(0, dune.y);
+    // Wavy dune line
+    for (let x = 0; x < canvas.width; x += 20) {
+        const y = dune.y + Math.sin(x * 0.01) * 15;
+        ctx.lineTo(x, y);
+    }
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+}
+function updateSandParticle(sand) {
+    // Ensure particle stays within reasonable bounds
+    sand.x = (sand.x + sand.speedX + canvas.width) % canvas.width;
+    sand.y -= sand.speedY;
+    
+    // Reset if above top (with buffer)
+    if (sand.y < -10) {
+        sand.y = canvas.height * 0.7 + Math.random() * 10;
+    }
+    
+    // Draw with size validation
+    const safeSize = Math.max(0.5, Math.min(sand.size, 2));
+    ctx.fillStyle = `rgba(237, 201, 81, ${Math.max(0, Math.min(sand.alpha, 1))})`;
+    ctx.beginPath();
+    ctx.arc(
+        Math.max(0, Math.min(sand.x, canvas.width)), // Clamp x
+        Math.max(0, Math.min(sand.y, canvas.height)), // Clamp y
+        safeSize,
+        0, Math.PI * 2
+    );
+    ctx.fill();
+}
+
+function updateDustDevil(devil) {
+    devil.rotation += 0.1;
+    devil.y -= 0.5;
+    
+    ctx.save();
+    ctx.translate(devil.x, devil.y);
+    ctx.rotate(devil.rotation);
+    
+    // Swirling dust - fixed radius calculations
+    for (let i = 0; i < 5; i++) {
+        const offset = i * 0.2; // Reduced offset increment
+        const width = Math.max(1, devil.width * (0.8 - offset)); // Ensure positive
+        const height = Math.max(1, devil.height * (0.4 - offset/2)); // Ensure positive
+        
+        ctx.fillStyle = `rgba(200, 180, 100, ${0.7 - offset})`;
+        ctx.beginPath();
+        ctx.ellipse(
+            0,                      // x
+            -i * 15,                // y
+            width,                  // radiusX 
+            height,                 // radiusY
+            0,                      // rotation
+            0, Math.PI * 2          // start/end angle
+        );
+        ctx.fill();
+    }
+    
+    ctx.restore();
+    
+    // Remove when off screen
+    return devil.y > -devil.height;
+}
+
+function drawPalmTree(palm) {
+    // Trunk
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(palm.x - 5, palm.y, 10, 40);
+    
+    // Fronds
+    ctx.fillStyle = '#2E8B57';
+    for (let i = 0; i < 5; i++) {
+        const angle = i * (Math.PI * 2 / 5);
+        ctx.beginPath();
+        ctx.moveTo(palm.x, palm.y);
+        ctx.quadraticCurveTo(
+            palm.x + Math.cos(angle) * 30,
+            palm.y + Math.sin(angle) * 30 - 40,
+            palm.x + Math.cos(angle) * 60,
+            palm.y + Math.sin(angle) * 60 - 80
+        );
+        ctx.lineTo(palm.x + Math.cos(angle + 0.3) * 40,
+                  palm.y + Math.sin(angle + 0.3) * 40 - 60);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function updateSeaTheme() {
+    // Ocean gradient background
+    const oceanGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    oceanGradient.addColorStop(0, '#1E90FF');  // Surface blue
+    oceanGradient.addColorStop(0.7, '#006994'); // Deep blue
+    oceanGradient.addColorStop(1, '#004D66');  // Darkest at bottom
+    ctx.fillStyle = oceanGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sunlight rays effect
+    ctx.save();
+    for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const gradient = ctx.createLinearGradient(
+            canvas.width/2, 
+            canvas.height/2,
+            canvas.width/2 + Math.cos(angle) * canvas.width,
+            canvas.height/2 + Math.sin(angle) * canvas.height
+        );
+        gradient.addColorStop(0, 'rgba(255,255,255,0.1)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.restore();
+
+    // Update all sea elements
+    for (let element of themeElements) {
+        switch(element.type) {
+            case 'wave':
+                updateWave(element);
+                break;
+            case 'fish':
+                updateFish(element);
+                break;
+            case 'coral':
+                drawCoral(element);
+                break;
+        }
+    }
+}
+
+function createSeaElements() {
+    // Clear existing sea elements
+    themeElements = themeElements.filter(e => !['wave', 'fish','coral'].includes(e.type));
+    
+    // Create waves (3 waves instead of 5)
+    for (let i = 0; i < 3; i++) {
+        themeElements.push({
+            type: 'wave',
+            x: Math.random() * canvas.width,
+            y: canvas.height - 50 - (i * 40), // More spacing
+            width: 200 + Math.random() * 100, // Wider waves
+            height: 15, // Consistent height
+            speed: 0.2 + Math.random() * 0.2, // Slower movement
+            offset: Math.random() * 100
+        });
+    }
+
+    // Reduced fish count (8 instead of 20)
+    const fishTypes = ['blue', 'yellow']; // Removed striped fish
+    for (let i = 0; i < 8; i++) {
+        themeElements.push({
+            type: 'fish',
+            fishType: fishTypes[Math.floor(Math.random() * fishTypes.length)],
+            x: Math.random() * canvas.width,
+            y: canvas.height * 0.4 + Math.random() * (canvas.height * 0.5), // Higher in water
+            size: 20 + Math.random() * 10, // Slightly larger
+            speed: 0.8 + Math.random(), // Faster movement
+            direction: Math.random() > 0.5 ? 1 : -1,
+            nextTurn: Math.random() * 300 + 100 // For smoother movement
+        });
+    }
+
+    //Fewer corals (5 instead of 8)
+    for (let i = 0; i < 5; i++) {
+        themeElements.push({
+            type: 'coral',
+            x: (canvas.width / 5) * i + Math.random() * 40,
+            y: canvas.height - 20,
+            height: 30 + Math.random() * 40,
+            color: `hsl(${Math.random() * 30 + 330}, 70%, 50%)`
+        });
+    }
+}
+function updateWave(wave) {
+    wave.offset += wave.speed;
+    const waveHeight = Math.sin(wave.offset) * 5;
+    
+    ctx.fillStyle = 'rgba(0, 150, 255, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(
+        wave.x, 
+        wave.y + waveHeight, 
+        wave.width, 
+        wave.height, 
+        0, 0, Math.PI * 2
+    );
+    ctx.fill();
+    
+    // White foam on waves
+    if (waveHeight > 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.ellipse(
+            wave.x, 
+            wave.y + waveHeight - 2, 
+            wave.width * 0.9, 
+            wave.height * 0.5, 
+            0, 0, Math.PI * 2
+        );
+        ctx.fill();
+    }
+}
+
+function updateFish(fish) {
+    // Smarter movement with occasional turns
+    fish.nextTurn--;
+    if (fish.nextTurn <= 0) {
+        fish.direction *= -1;
+        fish.nextTurn = Math.random() * 300 + 100;
+    }
+    
+    fish.x += fish.speed * fish.direction;
+    
+    // Wrap around screen edges
+    if (fish.x > canvas.width + fish.size) fish.x = -fish.size;
+    if (fish.x < -fish.size) fish.x = canvas.width + fish.size;
+    
+    // Simplified fish drawing
+    ctx.save();
+    ctx.translate(fish.x, fish.y);
+    if (fish.direction < 0) ctx.scale(-1, 1);
+    
+    // Body
+    ctx.fillStyle = fish.fishType === 'blue' ? '#1E90FF' : '#FFD700';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, fish.size, fish.size/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Tail (simpler triangle)
+    ctx.beginPath();
+    ctx.moveTo(-fish.size, 0);
+    ctx.lineTo(-fish.size * 1.3, -fish.size/2);
+    ctx.lineTo(-fish.size * 1.3, fish.size/2);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Single eye (optimized)
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(fish.size * 0.5, -fish.size/4, fish.size/10, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+}
+function drawCoral(coral) {
+    // Coral base
+    ctx.fillStyle = coral.color;
+    ctx.beginPath();
+    ctx.moveTo(coral.x, coral.y);
+    ctx.lineTo(coral.x + 10, coral.y - coral.height * 0.8);
+    ctx.lineTo(coral.x - 10, coral.y - coral.height);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Coral branches
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(coral.x, coral.y - coral.height * (i/3));
+        ctx.quadraticCurveTo(
+            coral.x + 15 * (i % 2 ? 1 : -1),
+            coral.y - coral.height * (0.2 + i/4),
+            coral.x + 30 * (i % 2 ? 1 : -1),
+            coral.y - coral.height * (0.3 + i/3)
+        );
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = coral.color;
+        ctx.stroke();
+    }
+}
+
+// Add to your theme creation functions
+function createStars(count) {
+    // Orion constellation and neighbors (with realistic colors and sizes)
+    const constellationStars = [
+        // Orion Stars
+        { name: "Betelgeuse", x: 0.2, y: 0.25, size: 3, color: "#FFAA33", brightness: 0.9 }, // Orange-red
+        { name: "Rigel", x: 0.25, y: 0.75, size: 2.5, color: "#AABFFF", brightness: 0.85 }, // Blue-white
+        { name: "Bellatrix", x: 0.3, y: 0.3, size: 2, color: "#CCDDFF", brightness: 0.8 },
+        { name: "Alnilam", x: 0.5, y: 0.5, size: 2.2, color: "#AACCFF", brightness: 0.85 },
+        { name: "Alnitak", x: 0.45, y: 0.52, size: 2, color: "#BBCCFF", brightness: 0.8 },
+        { name: "Mintaka", x: 0.55, y: 0.48, size: 2, color: "#CCDDFF", brightness: 0.8 },
+        { name: "Saiph", x: 0.35, y: 0.8, size: 2, color: "#AACCFF", brightness: 0.75 },
+        { name: "Meissa", x: 0.25, y: 0.15, size: 1.5, color: "#CCDDFF", brightness: 0.7 },
+        
+        // Orion Nebula (M42)
+        { name: "Orion Nebula", x: 0.52, y: 0.58, size: 8, color: "#44AAFF", brightness: 0.6, isNebula: true },
+        
+        // Iota Orionis (Hatsya)
+        { name: "Iota Orionis", x: 0.53, y: 0.6, size: 1.8, color: "#88BBFF", brightness: 0.75 },
+        
+        // Neighboring Stars
+        { name: "Sirius", x: 0.15, y: 0.85, size: 3, color: "#FFFFFF", brightness: 1.0 }, // Brightest star
+        { name: "Procyon", x: 0.1, y: 0.6, size: 2, color: "#FFEE99", brightness: 0.8 },
+        { name: "Aldebaran", x: 0.7, y: 0.4, size: 2.5, color: "#FF9933", brightness: 0.85 }, // Orange
+        { name: "Capella", x: 0.8, y: 0.2, size: 2.3, color: "#FFFF99", brightness: 0.85 } // Yellow
+    ];
+
+    // Create nebulae (horsehead and others)
+    themeElements.push({
+        type: 'nebula',
+        x: 0.48 * canvas.width,
+        y: 0.55 * canvas.height,
+        width: 40,
+        height: 30,
+        color: "#552277",
+        density: 0.7,
+        shape: 'horsehead' // Special shape
+    });
+
+    themeElements.push({
+        type: 'nebula',
+        x: 0.6 * canvas.width,
+        y: 0.4 * canvas.height,
+        width: 60,
+        height: 40,
+        color: "#3366AA",
+        density: 0.5
+    });
+
+    // Create all stars
+    for (let i = 0; i < count; i++) {
+        const isConstellationStar = i < constellationStars.length;
+        const star = isConstellationStar ? constellationStars[i] : {
+            x: Math.random(),
+            y: Math.random(),
+            size: Math.random() * 1.5 + 0.5,
+            color: getRandomStarColor(),
+            brightness: Math.random() * 0.5 + 0.3
+        };
+
+        if (star.isNebula) {
+            themeElements.push({
+                type: 'nebula',
+                x: star.x * canvas.width,
+                y: star.y * canvas.height,
+                width: star.size * 5,
+                height: star.size * 4,
+                color: star.color,
+                density: 0.6
+            });
+        } else {
+            themeElements.push({
+            type: 'star',
+            x: star.x * canvas.width,
+            y: star.y * canvas.height,
+            size: star.size,
+            color: star.color,
+            baseBrightness: star.brightness,
+            brightness: star.brightness,
+            twinkleSpeed: Math.random() * 0.02 + 0.01,
+            originalSize: star.size,
+            glowIntensity: star.brightness * 0.7 // New glow property
+        });
+        }
+    }
+
+    // Add shooting stars
+    themeElements.push({
+        type: 'shootingStar',
+        x: 0,
+        y: 0,
+        size: 2,
+        speed: 0,
+        angle: 0,
+        cooldown: Math.random() * 300 + 100,
+        trail: []
+    });
+}
+
+function getRandomStarColor() {
+    const colors = [
+        "#FFFFFF", // White
+        "#FFFAF0", // Ivory
+        "#FFE4C4", // Bisque
+        "#FFDAB9", // Peach
+        "#FFA07A", // Salmon
+        "#FF8C69", // Red-orange
+        "#FF6347", // Tomato
+        "#FF4500", // Orange-red
+        "#FFD700", // Gold
+        "#FFFF00", // Yellow
+        "#E6E6FA", // Lavender
+        "#ADD8E6", // Light blue
+        "#87CEFA", // Sky blue
+        "#1E90FF", // Dodger blue
+        "#0000FF"  // Blue
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function updateSpaceTheme() {
+    const now = Date.now();
+    
+    // Dark space background with subtle starfield
+    ctx.fillStyle = '#000011';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw faint starfield background
+    drawStarfield(150);
+    
+    // Draw all nebulae first (background elements)
+    themeElements.forEach(element => {
+        if (element.type === 'nebula') drawNebula(element);
+    });
+
+    // Then draw stars with glow
+    themeElements.forEach(element => {
+        if (element.type === 'star') {
+            // Twinkling effect
+            element.brightness = element.baseBrightness + 
+                Math.sin(now * element.twinkleSpeed) * 0.15;
+            
+            const glowIntensity = element.baseBrightness * 0.5;
+            const starSize = element.size;
+            const alpha = Math.max(0.1, Math.min(1, element.brightness));
+            
+            // Glow effect (3 layers)
+            
+            // 1. Outer glow (very subtle)
+            ctx.fillStyle = `${hexToRGBA(element.color, 0.1 * glowIntensity)}`;
+            ctx.beginPath();
+            ctx.arc(element.x, element.y, starSize * 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 2. Medium glow
+            ctx.fillStyle = `${hexToRGBA(element.color, 0.3 * glowIntensity)}`;
+            ctx.beginPath();
+            ctx.arc(element.x, element.y, starSize * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 3. Inner bright glow
+            ctx.fillStyle = `${hexToRGBA(element.color, 0.7 * glowIntensity)}`;
+            ctx.beginPath();
+            ctx.arc(element.x, element.y, starSize * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 4. The actual star core
+            ctx.fillStyle = `${hexToRGBA(element.color, alpha)}`;
+            ctx.beginPath();
+            ctx.arc(element.x, element.y, starSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // For very bright stars (magnitude < 1.5), add lens flare effect
+            if (element.baseBrightness > 0.85) {
+                ctx.save();
+                ctx.globalAlpha = 0.3 * glowIntensity;
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                
+                // Vertical flare
+                ctx.beginPath();
+                ctx.moveTo(element.x, element.y - starSize * 3);
+                ctx.lineTo(element.x, element.y + starSize * 3);
+                ctx.stroke();
+                
+                // Horizontal flare
+                ctx.beginPath();
+                ctx.moveTo(element.x - starSize * 3, element.y);
+                ctx.lineTo(element.x + starSize * 3, element.y);
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+        }
+    });
+
+    // Finally draw shooting stars (foreground elements)
+    themeElements.forEach(element => {
+        if (element.type === 'shootingStar') updateShootingStar(element);
+    });
+}
+
+function updateShootingStar(star) {
+    // Handle shooting star cooldown and spawning
+    star.cooldown--;
+    if (star.cooldown <= 0) {
+        // Reset shooting star
+        star.x = Math.random() * canvas.width;
+        star.y = Math.random() * canvas.height * 0.3;
+        star.angle = Math.random() * Math.PI * 0.4 + Math.PI * 0.1;
+        star.speed = 15 + Math.random() * 10;
+        star.trail = [];
+        star.cooldown = Math.random() * 600 + 300; // 5-15 seconds
+    }
+    
+    // Update active shooting star
+    if (star.speed > 0) {
+        star.x += Math.cos(star.angle) * star.speed;
+        star.y += Math.sin(star.angle) * star.speed;
+        
+        // Add to trail
+        star.trail.push({ x: star.x, y: star.y });
+        if (star.trail.length > 10) star.trail.shift();
+        
+        // Draw trail
+        if (star.trail.length > 1) {
+            // Glowing trail
+            const gradient = ctx.createLinearGradient(
+                star.trail[0].x, star.trail[0].y,
+                star.x, star.y
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(0.3, 'rgba(200, 240, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.9)');
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(star.trail[0].x, star.trail[0].y);
+            for (let j = 1; j < star.trail.length; j++) {
+                ctx.lineTo(star.trail[j].x, star.trail[j].y);
+            }
+            ctx.stroke();
+        }
+        
+        // Glowing head
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Star core
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Remove when off-screen
+        if (star.x > canvas.width || star.y > canvas.height) {
+            star.speed = 0;
+        }
+    }
+}
+
+function drawStarfield(count) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    for (let i = 0; i < count; i++) {
+        const size = Math.random() * 0.8;
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawNebula(nebula) {
+    ctx.save();
+    ctx.globalAlpha = 0.15 + nebula.density * 0.3;
+    
+    if (nebula.shape === 'horsehead') {
+        // Special shape for Horsehead Nebula
+        ctx.fillStyle = nebula.color;
+        ctx.beginPath();
+        ctx.moveTo(nebula.x, nebula.y);
+        ctx.bezierCurveTo(
+            nebula.x - nebula.width * 0.3, nebula.y + nebula.height * 0.2,
+            nebula.x - nebula.width * 0.5, nebula.y + nebula.height * 0.5,
+            nebula.x - nebula.width * 0.2, nebula.y + nebula.height
+        );
+        ctx.bezierCurveTo(
+            nebula.x + nebula.width * 0.4, nebula.y + nebula.height * 0.7,
+            nebula.x + nebula.width * 0.3, nebula.y + nebula.height * 0.3,
+            nebula.x, nebula.y
+        );
+        ctx.fill();
+    } else {
+        // Generic nebula shape
+        const gradient = ctx.createRadialGradient(
+            nebula.x, nebula.y, 0,
+            nebula.x, nebula.y, nebula.width
+        );
+        gradient.addColorStop(0, nebula.color);
+        gradient.addColorStop(1, `${hexToRGBA(nebula.color, 0)}`);
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(nebula.x, nebula.y, nebula.width, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    ctx.restore();
+}
+
+function hexToRGBA(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function createRainElements() {
+    themeElements = [];
+    
+    // Dark rain clouds (3-5 clouds)
+    const cloudCount = Math.floor(Math.random() * 3) + 3;
+    for (let i = 0; i < cloudCount; i++) {
+        const size = Math.random() * 100 + 50;
+        themeElements.push({
+            type: 'rainCloud',
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.4,
+            width: size,
+            height: size * 0.6,
+            speed: Math.random() * 0.3 + 0.1,
+            darkness: Math.random() * 0.5 + 0.3
+        });
+    }
+    
+    // Rain drops (denser rain)
+    for (let i = 0; i < 100; i++) {
+        themeElements.push({
+            type: 'rain',
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            length: Math.random() * 15 + 10,
+            speed: Math.random() * 8 + 5,
+            thickness: Math.random() * 1 + 0.5,
+            slant: Math.random() * 3 // More natural diagonal fall
+        });
+    }
+    
+    // Lightning system
+    themeElements.push({
+        type: 'lightning',
+        active: false,
+        cooldown: Math.random() * 10000 + 5000,
+        lastTime: Date.now(),
+        intensity: 0
+    });
+}
+
+// Update the theme drawing for rain
+function updateRainTheme() {
+    const now = Date.now();
+    
+    // Draw rain background (darker gray)
+    ctx.fillStyle = '#505050';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Update and draw all elements
+    for (let i = 0; i < themeElements.length; i++) {
+        const element = themeElements[i];
+        
+        switch(element.type) {
+            case 'rainCloud':
+                // Move clouds
+                element.x += element.speed;
+                if (element.x > canvas.width + element.width) {
+                    element.x = -element.width;
+                    element.y = Math.random() * canvas.height * 0.4;
+                }
+                
+                // Draw dark rain clouds
+                ctx.fillStyle = `rgba(50, 50, 50, ${element.darkness})`;
+                drawCloud(element.x, element.y, element.width, element.height);
+                break;
+                
+            case 'rain':
+                // Move rain
+                element.y += element.speed;
+                element.x += 0.5; // Slight diagonal
+                
+                // Reset rain at top when it falls off bottom
+                if (element.y > canvas.height) {
+                    element.y = -element.length;
+                    element.x = Math.random() * canvas.width;
+                }
+                
+                // Draw rain
+                ctx.strokeStyle = `rgba(200, 200, 255, 0.7)`;
+                ctx.lineWidth = element.thickness;
+                ctx.beginPath();
+                ctx.moveTo(element.x, element.y);
+                ctx.lineTo(element.x + 2, element.y + element.length);
+                ctx.stroke();
+                break;
+                
+            case 'lightning':
+                // Handle lightning flashes
+                if (!element.active && now - element.lastTime > element.cooldown) {
+                    element.active = true;
+                    element.duration = 100 + Math.random() * 200; // 100-300ms flash
+                    element.startTime = now;
+                    element.cooldown = Math.random() * 15000 + 5000; // 5-20s next flash
+                    playSound('thunder');
+                }
+                
+                // Draw lightning flash
+                if (element.active) {
+                    if (now - element.startTime < element.duration) {
+                        const intensity = 0.7 * (1 - (now - element.startTime)/element.duration);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    } else {
+                        element.active = false;
+                        element.lastTime = now;
+                    }
+                }
+                break;
+        }
+    }
+}
+
+// Add this to your sound effects initialization
+soundEffects.thunder = new Audio('https://assets.mixkit.co/active_storage/sfx/1286/1286-preview.mp3');
+soundEffects.thunder.volume = 0.3;
+
+// Add this function to update theme elements
+function updateThemeElements() {
+    // Clear the entire canvas with theme background color first
+    const bgColors = {
+        day: '#87CEEB',
+        rain: '#505050', // Darker gray for rain
+        desert: '#F4A460',
+        sea: '#1E90FF', 
+        space: '#000033'
+    };
+    ctx.fillStyle = bgColors[currentTheme] || '#87CEEB';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+if (currentTheme === 'desert') {
+        // Desert sky gradient (from orange to yellow)
+        const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.7);
+        skyGradient.addColorStop(0, '#FF7F24'); // Deep orange at top
+        skyGradient.addColorStop(1, '#F4D03F'); // Golden yellow at bottom
+        ctx.fillStyle = skyGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height * 0.7);
+        
+        // Sun
+        ctx.fillStyle = '#F39C12';
+        ctx.beginPath();
+        ctx.arc(canvas.width * 0.8, canvas.height * 0.15, 30, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    // Then handle each theme's special elements
+    switch(currentTheme) {
+        case 'day':
+            updateDayTheme();
+            break;
+        case 'rain':
+            updateRainTheme(); // Use our specialized rain update
+            break;
+        case 'desert':
+            updateDesertTheme();
+            break;
+        case 'sea':
+            updateSeaTheme();
+            break;
+        case 'space':
+            updateSpaceTheme();
+            break;
+        
+    }
+}
+
+
+function createDesertElements() {
+    // Clear existing
+    themeElements = themeElements.filter(e => e.type !== 'desert');
+    
+    // Dune base
+    themeElements.push({
+        type: 'dune',
+        x: 0,
+        y: canvas.height * 0.7,
+        width: canvas.width,
+        height: canvas.height * 0.3,
+        color: '#E6C229'
+    });
+
+    // Sand particles (100 count)
+    for (let i = 0; i < 100; i++) {
+        themeElements.push({
+            type: 'sand',
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.7,
+            size: Math.random() * 3 + 1,
+            speedX: Math.random() * 1 - 0.5,
+            speedY: Math.random() * 0.3 + 0.1,
+            alpha: Math.random() * 0.5 + 0.3
+        });
+    }
+
+    // Occasional dust devils
+    if (Math.random() > 0.7) { // 30% chance
+        themeElements.push({
+            type: 'dustDevil',
+            x: Math.random() * canvas.width,
+            y: canvas.height * 0.8,
+            width: 30,
+            height: 100,
+            rotation: 0
+        });
+    }
+
+    // Distant palm tree (oasis)
+    themeElements.push({
+        type: 'palm',
+        x: canvas.width * 0.2,
+        y: canvas.height * 0.68
+    });
+}
+
+function createClouds(count) {
+    for (let i = 0; i < count; i++) {
+        themeElements.push({
+            type: 'cloud',
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.5, // Only in top half of screen
+            width: Math.random() * 80 + 40, // 40-120px wide
+            height: Math.random() * 40 + 20, // 20-60px tall
+            speed: Math.random() * 0.3 + 0.1, // Speed variation
+            darkness: Math.random() * 0.2 + 0.7 // 70-90% opacity
+        });
+    }
+}
+
+// Improved cloud drawing
+function drawCloud(x, y, width, height, darkness = 0.8) {
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 255, 255, ${darkness})`;
+    
+    // Main cloud body
+    ctx.beginPath();
+    ctx.ellipse(x, y, width * 0.5, height * 0.6, 0, 0, Math.PI * 2);
+    
+    // Left puff
+    ctx.ellipse(
+        x - width * 0.2, 
+        y - height * 0.3, 
+        width * 0.4, 
+        height * 0.5, 
+        0, 0, Math.PI * 2
+    );
+    
+    // Right puff
+    ctx.ellipse(
+        x + width * 0.3, 
+        y - height * 0.2, 
+        width * 0.4, 
+        height * 0.5, 
+        0, 0, Math.PI * 2
+    );
+    
+    // Bottom puff
+    ctx.ellipse(
+        x + width * 0.1,
+        y + height * 0.2,
+        width * 0.5,
+        height * 0.4,
+        0, 0, Math.PI * 2
+    );
+    
+    ctx.fill();
+    ctx.restore();
+}
+
+        
+        
+        // Set canvas size to full window
+        function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initSpikes();
+    initThemeElements(); // Add this line to recreate theme elements on resize    
+}
+        
+        // Initialize
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Player
+        const player = {
+            x: canvas.width / 2 - 15,
+            y: canvas.height / 2,
+            width: 30,
+            height: 45,
+            speed: 5,
+            isOnPlatform: false,
+            velocityY: 0,
+            gravity: 0.2,
+            hasShield: false,
+            originalSpeed: 5,
+        };
+        
+        // Platform types
+        const PLATFORM_TYPES = {
+    NORMAL: { 
+        color: '#4CAF50', 
+        dangerous: false, 
+        breakable: false 
+    },
+    BREAKABLE: { 
+        color: '#FFEB3B', 
+        dangerous: false, 
+        breakable: true,
+        sound: 'platformBreak'
+    },
+    DANGEROUS: { 
+        color: '#F44336', 
+        dangerous: true, 
+        breakable: false,
+        spikeColor: '#880000'
+    },
+    BOUNCE: { 
+        color: '#9C27B0',
+        dangerous: false,
+        breakable: false,
+        effect: function() {
+            player.velocityY = -18;
+        },
+        sound: 'bounce'
+    },
+    SHIELD: {
+        color: '#FF9800',
+        dangerous: false,
+        breakable: false,
+        effect: function() {
+            if (powerupTimers.shield.timer) clearTimeout(powerupTimers.shield.timer);
+            player.hasShield = true;
+            powerupTimers.shield.time = 30;
+            powerupTimers.shield.active = true;
+            powerupTimers.shield.timer = setTimeout(() => {
+                player.hasShield = false;
+                powerupTimers.shield.active = false;
+                updatePowerupTimers();
+            }, 30000);
+            updatePowerupTimers();
+        },
+        sound: 'shield'
+    },
+    SPEED: {
+        color: '#00BCD4',
+        dangerous: false,
+        breakable: false,
+        effect: function() {
+            if (powerupTimers.speed.timer) clearTimeout(powerupTimers.speed.timer);
+            player.speed = 8;
+            powerupTimers.speed.time = 5;
+            powerupTimers.speed.active = true;
+            powerupTimers.speed.timer = setTimeout(() => {
+                player.speed = 5;
+                powerupTimers.speed.active = false;
+                updatePowerupTimers();
+            }, 5000);
+            updatePowerupTimers();
+        },
+        sound: 'powerup'
+    }
+};
+        
+        // Initialize spikes at the top (now pointing downward)
+        function createInitialPlatform() {
+    platforms.push({
+        x: canvas.width / 2 - 75,  // Center minus half width
+        y: canvas.height / 2 + 100, // Positioned below player
+        width: 150,
+        height: 15,
+        type: PLATFORM_TYPES.NORMAL,
+        breakTimer: 0,
+        markedForRemoval: false
+    });
+}
+        function initSpikes() {
+            spikes = [];
+            const spikeWidth = 20;
+            const spikeHeight = 20;
+            const spikeCount = Math.ceil(canvas.width / spikeWidth);
+            
+            for (let i = 0; i < spikeCount; i++) {
+                spikes.push({
+                    x: i * spikeWidth,
+                    y: 0,
+                    width: spikeWidth,
+                    height: spikeHeight
+                });
+            }
+        }
+        const PLATFORM_PROBABILITIES = {
+    NORMAL: 45,     // 45%
+    BREAKABLE: 25,  // 25%
+    DANGEROUS: 15,  // 15%
+    BOUNCE: 5,      // 5%
+    SPEED: 5,       // 5%
+    SHIELD: 5       // 5%
+};
+        // Create a new platform
+        function createPlatform() {
+    const width = Math.random() * 100 + 50;
+    const x = Math.random() * (canvas.width - width);
+    const type = Math.random() * 100; // Now 0-100 to match percentages
+    
+    let platformType;
+    if (type < PLATFORM_PROBABILITIES.NORMAL) {
+        platformType = PLATFORM_TYPES.NORMAL;
+    } 
+    else if (type < PLATFORM_PROBABILITIES.NORMAL + PLATFORM_PROBABILITIES.BREAKABLE) {
+        platformType = PLATFORM_TYPES.BREAKABLE;
+    }
+    else if (type < PLATFORM_PROBABILITIES.NORMAL + PLATFORM_PROBABILITIES.BREAKABLE + PLATFORM_PROBABILITIES.DANGEROUS) {
+        platformType = PLATFORM_TYPES.DANGEROUS;
+    }
+    else if (type < PLATFORM_PROBABILITIES.NORMAL + PLATFORM_PROBABILITIES.BREAKABLE + PLATFORM_PROBABILITIES.DANGEROUS + PLATFORM_PROBABILITIES.BOUNCE) {
+        platformType = PLATFORM_TYPES.BOUNCE;
+    }
+else if (type < PLATFORM_PROBABILITIES.NORMAL + PLATFORM_PROBABILITIES.BREAKABLE + 
+         PLATFORM_PROBABILITIES.DANGEROUS + PLATFORM_PROBABILITIES.BOUNCE + 
+         PLATFORM_PROBABILITIES.SPEED) {
+    platformType = PLATFORM_TYPES.SPEED;
+    trailPositions = []; // Reset trail when getting new speed boost
+}
+    else {
+        platformType = PLATFORM_TYPES.SHIELD;
+    }
+    
+    // Create the platform (rest of your existing code)
+    platforms.push({
+        x: x,
+        y: canvas.height,
+        width: width,
+        height: 15,
+        type: platformType,
+        breakTimer: platformType.breakable ? 60 : 0,
+        markedForRemoval: false
+    });
+}
+        wasTouched = false;
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        document.addEventListener('click', initAudio, { once: true });
+document.addEventListener('keydown', initAudio, { once: true });
+document.addEventListener('touchstart', initAudio, { once: true });
+        
+        // Mobile touch controls
+        leftBtn.addEventListener('touchstart', () => { keys['ArrowLeft'] = true; });
+        leftBtn.addEventListener('touchend', () => { keys['ArrowLeft'] = false; });
+        leftBtn.addEventListener('mousedown', () => { keys['ArrowLeft'] = true; });
+        leftBtn.addEventListener('mouseup', () => { keys['ArrowLeft'] = false; });
+        leftBtn.addEventListener('mouseleave', () => { keys['ArrowLeft'] = false; });
+        
+        rightBtn.addEventListener('touchstart', () => { keys['ArrowRight'] = true; });
+        rightBtn.addEventListener('touchend', () => { keys['ArrowRight'] = false; });
+        rightBtn.addEventListener('mousedown', () => { keys['ArrowRight'] = true; });
+        rightBtn.addEventListener('mouseup', () => { keys['ArrowRight'] = false; });
+        rightBtn.addEventListener('mouseleave', () => { keys['ArrowRight'] = false; });
+        
+        // Prevent scrolling on mobile when touching buttons
+        document.addEventListener('touchmove', (e) => {
+            if (gameRunning) e.preventDefault();
+        }, { passive: false });
+        
+        function updateAndDrawTrail() {
+    if (!powerupTimers.speed.active) {
+        trailPositions = [];
+        return;
+    }
+
+    // Update trail positions (simplified)
+    trailUpdateCounter++;
+    if (trailUpdateCounter >= TRAIL_UPDATE_RATE) {
+        trailUpdateCounter = 0;
+        trailPositions.push({
+            x: player.x + player.width/2,
+            y: player.y + player.height/2
+        });
+        if (trailPositions.length > MAX_TRAIL_LENGTH) {
+            trailPositions.shift();
+        }
+    }
+
+    // Draw optimized trail
+    if (trailPositions.length > 1) {
+        ctx.save();
+        
+        // Single pass with gradient opacity
+        const gradient = ctx.createLinearGradient(
+            trailPositions[0].x, trailPositions[0].y,
+            trailPositions[trailPositions.length-1].x, 
+            trailPositions[trailPositions.length-1].y
+        );
+        gradient.addColorStop(0, 'rgba(0, 188, 212, 0.8)'); // Start (bright)
+        gradient.addColorStop(1, 'rgba(0, 188, 212, 0)');   // End (transparent)
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(trailPositions[0].x, trailPositions[0].y);
+        for (let i = 1; i < trailPositions.length; i++) {
+            ctx.lineTo(trailPositions[i].x, trailPositions[i].y);
+        }
+        ctx.stroke();
+        
+        // Light core for emphasis (no shadows)
+        ctx.strokeStyle = 'rgba(200, 240, 255, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.stroke(); // Re-stroke same path
+        
+        ctx.restore();
+    }
+}
+        
+        function showHowToPlay() {
+    document.getElementById("howToPlayPanel").style.display = "block";
+    document.querySelector("#startScreen .menu-buttons").style.display = "none";
+    document.getElementById('topText').style.display = 'none';
+}
+
+function hideHowToPlay() {
+    document.getElementById("howToPlayPanel").style.display = "none";
+    document.querySelector("#startScreen .menu-buttons").style.display = "flex";
+    document.getElementById('topText').style.display = 'block';
+}
+        // Game loop
+        function gameLoop() {
+    if (!gameRunning) return;
+     // Update timers
+    if (powerupTimers.shield.active) {
+        powerupTimers.shield.time = Math.max(0, powerupTimers.shield.time - (1/60));
+        if (powerupTimers.shield.time <= 0) {
+            powerupTimers.shield.active = false;
+        }
+    }
+    
+    if (powerupTimers.speed.active) {
+        powerupTimers.speed.time = Math.max(0, powerupTimers.speed.time - (1/60));
+        if (powerupTimers.speed.time <= 0) {
+            powerupTimers.speed.active = false;
+        }
+    }
+    
+    updatePowerupTimers();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateThemeElements();
+    updateParticles();
+    updatePlayer();
+    updatePlatforms();
+    updateAndDrawTrail();
+   
+            
+            // Spawn new platforms
+            platformSpawnCounter++;
+            if (platformSpawnCounter >= platformSpawnRate) {
+                createPlatform();
+                platformSpawnCounter = 0;
+                
+                // Increase difficulty over time
+                platformSpawnRate = Math.max(30, platformSpawnRate - 1);
+                gameSpeed = Math.min(6, gameSpeed + 0.01);
+            }
+            
+            
+            
+            // Draw platforms
+            drawPlatforms();
+            
+            // Draw spikes
+            drawSpikes();
+            
+            // Draw player
+            drawPlayer();
+            
+            drawParticles();
+            
+            
+            // Update score
+            scoreDisplay.textContent = `Score: ${Math.floor(score)}`;
+            
+            requestAnimationFrame(gameLoop);
+}
+
+function updatePlatforms() {
+    // Move platforms up
+    for (let i = 0; i < platforms.length; i++) {
+        platforms[i].y -= gameSpeed;
+        
+        // Update breakable platforms
+        if (platforms[i].type.breakable && platforms[i].breakTimer < 60) {
+            platforms[i].breakTimer--;
+            
+            
+            if (platforms[i].breakTimer <= 0) {
+                // Final break particles
+                createParticles(
+                    platforms[i].x + platforms[i].width/2, 
+                    platforms[i].y + platforms[i].height/2,
+                    platforms[i].type.color,
+                    30 // Extra particles for final break
+                );
+                platforms[i].markedForRemoval = true;
+            }
+        }
+        
+        // Remove platforms that are off screen or marked
+        if (platforms[i].y < -platforms[i].height || platforms[i].markedForRemoval) {
+            // Add to score when platform passes the player
+            if (platforms[i].y + platforms[i].height < player.y && !platforms[i].markedForRemoval) {
+                // Combo system
+                if (Math.abs(platforms[i].y - lastPlatformY) < 100) {
+                    comboCount++;
+                    score += comboCount;
+                } else {
+                    comboCount = 1;
+                    score += 1;
+                }
+                lastPlatformY = platforms[i].y;
+            }
+            platforms.splice(i, 1);
+            i--;
+        }
+    }
+}
+function saveAudioSettings() {
+    localStorage.setItem('audioSettings', JSON.stringify({
+        musicEnabled,
+        soundsEnabled,
+        volume: bgMusic.volume
+    }));
+}
+
+function loadAudioSettings() {
+    const saved = JSON.parse(localStorage.getItem('audioSettings')) || {};
+    return {
+        musicEnabled: saved.musicEnabled ?? true,
+        soundsEnabled: saved.soundsEnabled ?? true,
+        volume: saved.volume ?? 0.5
+    };
+}
+function drawSpikes() {
+    ctx.fillStyle = '#000';
+    for (const spike of spikes) {
+        // Draw triangle spikes pointing downward
+        ctx.beginPath();
+        ctx.moveTo(spike.x, spike.y);
+        ctx.lineTo(spike.x + spike.width/2, spike.y + spike.height);
+        ctx.lineTo(spike.x + spike.width, spike.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+function updatePowerupTimers() {
+    let anyActive = false;
+    
+    // Update shield timer
+    if (powerupTimers.shield.active) {
+        powerupTimers.shield.element.style.display = 'block';
+        powerupTimers.shield.element.querySelector('.time').textContent = 
+            powerupTimers.shield.time.toFixed(1) + 's';
+        anyActive = true;
+    } else {
+        powerupTimers.shield.element.style.display = 'none';
+    }
+    
+    // Update speed timer
+    if (powerupTimers.speed.active) {
+        powerupTimers.speed.element.style.display = 'block';
+        powerupTimers.speed.element.querySelector('.time').textContent = 
+            powerupTimers.speed.time.toFixed(1) + 's';
+        anyActive = true;
+    } else {
+        powerupTimers.speed.element.style.display = 'none';
+    }
+    
+    // Show/hide container
+    powerupTimers.container.style.display = anyActive ? 'flex' : 'none';
+}
+// Add this function with your other utility functions
+function createParticles(x, y, color) {
+    const count = color === '#9C27B0' ? 25 : 15; // More particles for bounce
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            size: Math.random() * 5 + 3,
+            color: color,
+            speedX: Math.random() * 6 - 3,
+            speedY: Math.random() * -4 - 2,
+            life: 45 + Math.random() * 30
+        });
+    }
+    if (color === '#FF9800') { // Shield
+    playSound('shield');
+}
+else if (color === '#9C27B0') { // Bounce
+    playSound('bounce');
+}
+if (color === '#FFEB3B') { // Breakable platform
+    playSound('platformBreak');
+}
+}
+
+function updateParticles() {
+    for (let i = 0; i < particles.length; i++) {
+        particles[i].x += particles[i].speedX;
+        particles[i].y += particles[i].speedY;
+        particles[i].life--;
+        if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+            i--;
+        }
+    }
+}
+function initSoundSystem() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = soundEnabled.value ? 0.5 : 0;
+        gainNode.connect(audioContext.destination);
+        soundEnabled.value = true;
+        
+        // Preload all sounds
+        Object.keys(sounds).forEach(key => {
+            fetch(sounds[key])
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(audioBuffer => {
+                    soundBuffers[key] = audioBuffer;
+                })
+                .catch(e => console.warn(`Failed to load sound ${key}:`, e));
+        });
+    } catch (e) {
+        // Fallback to HTML5 Audio
+        soundEnabled.value = true;
+        
+    }
+}
+function initAudio() {
+    // Initialize Web Audio API if available
+    if (window.AudioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = soundEnabled ? 0.5 : 0;
+            gainNode.connect(audioContext.destination);
+        } catch (error) {
+            console.warn("Web Audio API failed:", error);
+        }
+    }
+    
+    // Initialize HTML5 Audio volumes
+    Object.values(soundEffects).forEach(sound => {
+        sound.volume = soundEnabled ? 0.3 : 0;
+    });
+    
+    // Update UI to match current state
+    document.getElementById('soundToggle').checked = soundEnabled;
+    document.getElementById('musicToggle').checked = musicEnabled;
+    
+    // Start music if enabled, but only after user interaction
+    if (musicEnabled) {
+        document.addEventListener('click', startMusicAfterInteraction, { once: true });
+        document.addEventListener('keydown', startMusicAfterInteraction, { once: true });
+    }
+}
+
+function startMusicAfterInteraction() {
+    if (musicEnabled) {
+        bgMusic.play().catch(e => {
+            console.warn("Audio playback failed:", e);
+            // Fallback: Try again on next interaction
+            document.addEventListener('click', startMusicAfterInteraction, { once: true });
+            document.addEventListener('keydown', startMusicAfterInteraction, { once: true });
+        });
+    }
+}
+
+function playSound(name) {
+    if (!soundEnabled || !soundEffects[name]) return;
+    
+    try {
+        // Try Web Audio API first
+        if (audioContext && soundBuffers[name]) {
+            const source = audioContext.createBufferSource();
+            source.buffer = soundBuffers[name];
+            source.connect(gainNode);
+            source.start(0);
+            return;
+        }
+        
+        // Fallback to HTML5 Audio
+        const sound = new Audio(soundEffects[name].src);
+        sound.volume = soundEnabled ? 0.3 : 0;
+        sound.play().catch(() => {});
+    } catch (error) {
+        console.warn("Sound playback failed:", error);
+    }
+}
+
+function drawParticles() {
+    for (const p of particles) {
+        ctx.globalAlpha = p.life / 50;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); // Fixed: changed 'y' to 'p.y'
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function updatePlayer() {
+    // Horizontal movement
+    if (keys['ArrowLeft'] || keys['a']) {
+        player.x -= player.speed;
+        if (player.x < 0) player.x = 0;
+    }
+    if (keys['ArrowRight'] || keys['d']) {
+        player.x += player.speed;
+        if (player.x > canvas.width - player.width) {
+            player.x = canvas.width - player.width;
+        }
+    }
+
+    // Apply gravity
+    player.velocityY += player.gravity;
+    player.y += player.velocityY;
+
+    // Platform collision
+    const wasOnPlatform = player.isOnPlatform;
+    player.isOnPlatform = false;
+    let hitBounceThisFrame = false;
+    let powerupPlatformHitThisFrame = null;
+
+    for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        
+        if (
+            player.y + player.height >= platform.y &&
+            player.y + player.height <= platform.y + platform.height &&
+            player.x + player.width > platform.x &&
+            player.x < platform.x + platform.width &&
+            player.velocityY > 0
+        ) {
+            player.isOnPlatform = true;
+            player.y = platform.y - player.height;
+            
+            // Handle platform types
+            if (platform.type.dangerous) {
+    if (player.hasShield) {
+        player.hasShield = false;
+        player.velocityY = -5;
+        
+        // Clear the shield timer
+        if (powerupTimers.shield.timer) {
+            clearTimeout(powerupTimers.shield.timer);
+            powerupTimers.shield.active = false;
+            powerupTimers.shield.time = 0;
+            updatePowerupTimers();
+        }
+        
+        // Change platform to safe (green)
+        platform.type = PLATFORM_TYPES.NORMAL;
+        platform.color = PLATFORM_TYPES.NORMAL.color;
+        
+        createParticles(player.x + player.width/2, player.y, '#FF9800');
+        createParticles(platform.x + platform.width/2, platform.y, '#4CAF50');
+        playSound('shield');
+        playSound('transform');
+    } else {
+        // Check if player is hitting the spikes (top part)
+        if (player.y + player.height <= platform.y + 5) { // 5px tolerance
+            playSound('gameOver');
+            gameOver();
+            return;
+        }
+    }
+}
+            else if (platform.type.breakable) {
+                if (platform.breakTimer === 60) {
+                    platform.breakTimer = 59;
+                    
+                }
+            }
+            else if (platform.type.effect) {
+                // Only show particles if first contact
+                if (!platform.wasTouched) {
+                    playSound(platform.type.sound);
+                    powerupPlatformHitThisFrame = platform;
+                    platform.wasTouched = true;
+                    
+                    // Play appropriate sound
+                    if (platform.type === PLATFORM_TYPES.BOUNCE) {
+                        playSound('bounce');
+                    } else {
+                        playSound(platform.type.sound || 'powerup');
+                    }
+                }
+                
+                platform.type.effect();
+                
+                if (platform.type === PLATFORM_TYPES.BOUNCE) {
+                    hitBounceThisFrame = true;
+                    platform.markedForRemoval = true;
+                }
+            }
+            
+            if (platform.type !== PLATFORM_TYPES.BOUNCE) {
+                player.velocityY = 0;
+            }
+        } else {
+            // Reset touch status when not colliding
+            if (platform.type.effect) {
+                platform.wasTouched = false;
+            }
+        }
+    }
+
+    // Play jump sound when leaving a platform
+    if (wasOnPlatform && !player.isOnPlatform && player.velocityY > 0) {
+        playSound('jump');
+        score += 10;
+        comboCount++;
+    }
+    // Create particles for power-up platform hit this frame
+    if (powerupPlatformHitThisFrame) {
+        createParticles(
+            powerupPlatformHitThisFrame.x + powerupPlatformHitThisFrame.width/2,
+            powerupPlatformHitThisFrame.y,
+            powerupPlatformHitThisFrame.type.color
+        );
+    }
+
+    // Update bounce state
+    if (hitBounceThisFrame) {
+        isBouncing = true;
+        bounceStartTime = Date.now();
+    } else if (isBouncing && Date.now() - bounceStartTime > 1000) {
+        isBouncing = false;
+    }
+
+    // Game over if falls through bottom
+    if (player.y > canvas.height) {
+        playSound('gameOver');
+        gameOver();
+        return;
+    }
+
+    // Spike collision (skip if bouncing upward)
+    if (!isBouncing && player.velocityY >= 0) {
+        for (const spike of spikes) {
+            if (player.y < spike.height + 0 &&
+                player.x + player.width > spike.x &&
+                player.x < spike.x + spike.width) {
+                if (player.hasShield) {
+                    player.hasShield = false;
+                    player.velocityY = -5;
+                    createParticles(player.x + player.width/2, player.y, '#FF9800');
+                    playSound('shield')
+                } else {
+                    playSound('gameOver');
+                    gameOver();
+                    return;
+                }
+            }
+        }
+    }
+    
+    // Ceiling protection during bounce
+    const CEILING_BUFFER = 50;
+    if (isBouncing && player.y < CEILING_BUFFER) {
+        player.y = CEILING_BUFFER;
+        player.velocityY = 0;
+        createParticles(player.x + player.width/2, CEILING_BUFFER, '#9C27B0');
+    }
+}
+        
+        function drawPlatforms() {
+    for (const platform of platforms) {
+        // Platform base
+        ctx.fillStyle = platform.type.color;
+        ctx.beginPath();
+        ctx.roundRect(platform.x, platform.y, platform.width, platform.height, 3);
+        ctx.fill();
+
+        // Transformation effect
+        if (platform.transformTimer > 0) {
+            ctx.globalAlpha = platform.transformTimer/30;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            ctx.globalAlpha = 1;
+            platform.transformTimer--;
+        }
+
+        // Platform details
+        if (platform.type.breakable) {
+            const alpha = platform.breakTimer / 60;
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.5 * (1 - alpha)})`;
+            // Crack effect
+            if (alpha < 0.7) {
+                ctx.strokeStyle = `rgba(0, 0, 0, ${1 - alpha})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(platform.x + 10, platform.y + 5);
+                ctx.lineTo(platform.x + platform.width - 10, platform.y + 10);
+                ctx.stroke();
+            }
+        }
+        
+        // DRAW SPIKES FOR DANGEROUS PLATFORMS (MOVED OUTSIDE breakable CHECK)
+        if (platform.type === PLATFORM_TYPES.DANGEROUS) {
+            drawPlatformSpikes(platform);
+        }
+    }
+}
+        
+        function drawPlatformSpikes(platform) {
+    const spikeWidth = 10;
+    const spikeHeight = 8;
+    const spikeCount = Math.floor(platform.width / spikeWidth);
+    const startX = platform.x + (platform.width - (spikeCount * spikeWidth)) / 2;
+    
+    // Draw spike shadows first
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    for (let i = 0; i < spikeCount; i++) {
+        const x = startX + i * spikeWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, platform.y + 1);
+        ctx.lineTo(x + spikeWidth/2, platform.y - spikeHeight + 1);
+        ctx.lineTo(x + spikeWidth, platform.y + 1);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // Draw actual spikes
+    ctx.fillStyle = platform.type.spikeColor || '#880000';
+    for (let i = 0; i < spikeCount; i++) {
+        const x = startX + i * spikeWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, platform.y);
+        ctx.lineTo(x + spikeWidth/2, platform.y - spikeHeight);
+        ctx.lineTo(x + spikeWidth, platform.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+        
+        function drawPlayer() {
+    ctx.fillStyle = '#2196F3';
+    ctx.beginPath();
+    ctx.roundRect(player.x, player.y, player.width, player.height, 5);
+    ctx.fill();
+    
+    // Add eyes to make character more appealing
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(player.x + player.width/3, player.y + player.height/3, 4, 0, Math.PI*2);
+    ctx.arc(player.x + player.width*2/3, player.y + player.height/3, 4, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Add smile
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(player.x + player.width/2, player.y + player.height/2, 10, 0.1*Math.PI, 0.9*Math.PI);
+    ctx.stroke();
+    
+    //Add shield
+    if (player.hasShield) {
+        ctx.save();
+        ctx.strokeStyle = '#FF9800';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#FF9800';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(
+            player.x + player.width/2, 
+            player.y + player.height/2,
+            player.width * 1.2, // Slightly larger than player
+            0, 
+            Math.PI*2
+        );
+        ctx.stroke();
+        ctx.restore();
+    }}
+        
+        function gameOver() {
+    highScore = Math.max(highScore, Math.floor(score));
+    saveGameState(); // Save the new high score
+    
+    finalScore.innerHTML = `Score: ${Math.floor(score)}<br>High Score: ${highScore}`;
+    gameOverScreen.style.display = 'block';
+    gameRunning = false;
+    
+    if (player.hasShield) {
+        player.hasShield = false;
+        player.velocityY = -5;
+        return;
+    }
+}
+        function returnToMenu() {
+    // Reset game state (similar to resetGame but without starting)
+    score = 0;
+    platforms = [];
+    player.hasShield = false;
+    player.speed = player.originalSpeed;
+    gameSpeed = 2;
+    platformSpawnRate = 100;
+    
+    // Clear timers
+    if (shieldTimer) clearTimeout(shieldTimer);
+    if (speedTimer) clearTimeout(speedTimer);
+    
+    // Hide game over screen, show start screen
+    gameOverScreen.style.display = 'none';
+    startScreen.style.display = 'block';
+    powerupTimers.shield.active = false;
+    powerupTimers.speed.active = false;
+    updatePowerupTimers();
+}
+        function resetGame() {
+        if (shieldTimer) clearTimeout(shieldTimer);
+    if (speedTimer) clearTimeout(speedTimer);
+    shieldTimer = null;
+    speedTimer = null;
+    player.hasShield = false;
+    player.speed = 5;
+    // Reset game state
+    score = 0;
+    platforms = [];
+    platformSpawnCounter = 0;
+    gameSpeed = 2;
+    platformSpawnRate = 100;
+    
+    // Reset player position (higher up than center)
+    player.x = canvas.width / 2 - 15;
+    player.y = canvas.height / 2 - 100;  // Higher than center
+    player.velocityY = 0;
+    isBouncing = false;
+    bounceStartTime = 0;
+    // Create initial platform
+    createInitialPlatform();
+    if (shieldTimer) clearTimeout(shieldTimer);
+    if (speedTimer) clearTimeout(speedTimer);
+    shieldTimer = null;
+    speedTimer = null;
+    player.hasShield = false;
+    player.speed = 5; // Reset to default speed
+    
+    // Reset spikes
+    initSpikes();
+    powerupTimers.shield.active = false;
+    powerupTimers.speed.active = false;
+    updatePowerupTimers();
+    // Hide game over screen
+    gameOverScreen.style.display = 'none';
+    
+    // Start game
+    startGame();
+}
+        
+        function startGame() {
+        player.x = canvas.width / 2 - 15;
+    player.y = canvas.height / 2 - 100;  // Higher than center
+    player.velocityY = 0;
+    createInitialPlatform();
+            startScreen.style.display = 'none';
+            gameRunning = true;
+            initSpikes();
+            gameLoop();
+        }
+        // Initialize the game
+        initSpikes();
+        
+function showSettings() {
+    document.getElementById("settingsPanel").style.display = "block";
+    document.querySelector("#startScreen .menu-buttons").style.display = "none";
+    document.getElementById('topText').style.display = 'none';
+}
+
+function hideSettings() {
+    document.getElementById("settingsPanel").style.display = "none";
+    document.querySelector("#startScreen .menu-buttons").style.display = "flex";
+    document.getElementById('topText').style.display = 'block';
+}
+
+function showCredits() {
+    document.getElementById("creditsPanel").style.display = "block";
+    document.querySelector("#startScreen .menu-buttons").style.display = "none";
+    document.getElementById('topText').style.display = 'none';
+}
+
+function hideCredits() {
+    document.getElementById("creditsPanel").style.display = "none";
+    document.querySelector("#startScreen .menu-buttons").style.display = "flex";
+    document.getElementById('topText').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadGameState(); // Load saved settings
+    
+    document.getElementById('themeSelect').addEventListener('change', function(e) {
+    currentTheme = e.target.value;
+    initThemeElements();
+    saveGameState();
+});
+    
+    // Music toggle
+    document.getElementById('musicToggle').addEventListener('change', function(e) {
+    musicEnabled = e.target.checked;
+    if (musicEnabled) {
+        // Only try to play after user interaction
+        startMusicAfterInteraction();
+    } else {
+        bgMusic.pause();
+    }
+    saveGameState();
+});
+
+    // Sound effects toggle
+    document.getElementById('soundToggle').addEventListener('change', function(e) {
+        soundEnabled = e.target.checked;
+        
+        // Update Web Audio
+        if (gainNode) {
+            gainNode.gain.value = soundEnabled ? 0.5 : 0;
+        }
+        
+        // Update HTML5 Audio volumes
+        Object.values(soundEffects).forEach(sound => {
+            sound.volume = soundEnabled ? 0.3 : 0;
+        });
+        
+        saveGameState();
+    });
+    
+    // Volume control
+    document.getElementById('musicVolume').addEventListener('input', function(e) {
+        const volume = parseFloat(e.target.value);
+        bgMusic.volume = volume;
+        saveGameState();
+    });
+    
+    // Initialize audio on first interaction
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('keydown', initAudio, { once: true });
+});
+
+// Save game state
+function saveGameState() {
+    const gameState = {
+        highScore: highScore,
+        settings: {
+            soundsOn: soundEnabled,
+            musicOn: musicEnabled,
+            volume: bgMusic.volume,
+            theme: currentTheme // Add this
+        }
+    };
+    localStorage.setItem('gameSettings', JSON.stringify(gameState));
+}
+
+function loadGameState() {
+    const saved = localStorage.getItem('gameSettings');
+    if (saved) {
+        try {
+            const gameState = JSON.parse(saved);
+            
+            currentTheme = gameState.settings?.theme || 'day';
+            document.getElementById('themeSelect').value = currentTheme;
+            initThemeElements();
+            
+            // Load sound settings
+            soundEnabled = gameState.settings?.soundsOn ?? true;
+            document.getElementById('soundToggle').checked = soundEnabled;
+            
+            // Load music settings
+            musicEnabled = gameState.settings?.musicOn ?? true;
+            document.getElementById('musicToggle').checked = musicEnabled;
+            
+            // Load volume
+            const volume = gameState.settings?.volume ?? 0.5;
+            bgMusic.volume = volume;
+            document.getElementById('musicVolume').value = volume;
+            
+            // Load high score
+            highScore = gameState.highScore || 0;
+            
+            // Update sound effects volume
+            Object.values(soundEffects).forEach(sound => {
+                sound.volume = soundEnabled ? 0.3 : 0;
+            });
+            
+        } catch (e) {
+            console.warn("Failed to load settings:", e);
+        }
+    }
+}
+
+// Initialize audio when page loads
+initAudio();
+updateThemeElements();
+</script>
+</body>
+</html>
